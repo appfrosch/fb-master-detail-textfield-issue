@@ -36,6 +36,8 @@ struct ItemListView: View {
                     }
                 }
             }
+            .navigationTitle("Master-Detail TextField Editing Issue")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
@@ -44,9 +46,17 @@ struct ItemDetailView: View {
     @Binding var item: Item
     
     var body: some View {
+        Text("Trying to change the text in the title textfield **in the middle of the text** unexpectedly moves the cursor to the end of the text.")
+            .font(.caption)
+            .padding()
         Form {
-            TextField("", text: $item.title)
-            Section {
+            Section("Title Textfield") {
+                TextField("", text: $item.title)
+            }
+            Section("Subitems") {
+                if item.subitems.isEmpty {
+                    Text("No subitems")
+                }
                 ForEach($item.subitems) { $subitem in
                     NavigationLink {
                         ItemDetailView(item: $subitem)
@@ -56,5 +66,7 @@ struct ItemDetailView: View {
                 }
             }
         }
+        .navigationTitle(item.title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
