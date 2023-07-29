@@ -44,29 +44,54 @@ struct ItemListView: View {
 
 struct ItemDetailView: View {
     @Binding var item: Item
+    @State private var itemTitle: String
+    
+    init(
+        item: Binding<Item>
+    ) {
+        self._item = item
+        self._itemTitle = State(initialValue: item.wrappedValue.title)
+    }
     
     var body: some View {
-        Text("Trying to change the text in the title textfield **in the middle of the text** unexpectedly moves the cursor to the end of the text.")
-            .font(.caption)
-            .padding()
-        Form {
-            Section("Title Textfield") {
-                TextField("", text: $item.title)
-            }
-            Section("Subitems") {
-                if item.subitems.isEmpty {
-                    Text("No subitems")
+        VStack {
+            Text("Trying to change the text in the title textfield **in the middle of the text** unexpectedly moves the cursor to the end of the text.")
+                .font(.caption)
+                .padding()
+            Form {
+                Section("Title Textfield") {
+                    TextField("", text: $itemTitle)
+                        .onChange(of: itemTitle, perform: { _ in
+                            item.title = itemTitle
+                        })
                 }
-                ForEach($item.subitems) { $subitem in
-                    NavigationLink {
-                        ItemDetailView(item: $subitem)
-                    } label: {
-                        Text(subitem.title)
+                Section("Subitems") {
+                    if item.subitems.isEmpty {
+                        Text("No subitems")
+                    }
+                    ForEach($item.subitems) { $subitem in
+                        NavigationLink {
+                            ItemDetailView(item: $subitem)
+                        } label: {
+                            Text(subitem.title)
+                        }
                     }
                 }
             }
+            Text("""
+                Rather hacky workaround:
+                instantiate a local `@State` variable in the detail view and synchronize it with the `@Binding`.
+                """)
+                .font(.caption)
+                .padding()
         }
         .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+struct ItemDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
     }
 }
